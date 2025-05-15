@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Chaos: The Reaction Rate Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #reaction-chamber {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            background-color: #eef7fe;
+            margin-bottom: 20px;
+        }
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+            transition: background-color 0.3s;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .value-display {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .metrics {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .metric {
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .level-info {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .level-target {
+            font-weight: bold;
+        }
+        .progress-container {
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #2ecc71;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .reactions-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chemical Chaos: The Reaction Rate Game</h1>
+    
+    <div class="game-container">
+        <div class="level-info">
+            <h3>Level 1: Understanding Temperature</h3>
+            <p>Use the temperature slider to reach the target reaction rate.</p>
+            <p class="level-target">Target: <span id="target-rate">5</span> reactions per second</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="level-progress"></div>
+            </div>
+        </div>
+        
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="reaction-rate">0</div>
+                <div class="metric-label">Reactions/sec</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="total-reactions">0</div>
+                <div class="metric-label">Total Reactions</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="time-left">60</div>
+                <div class="metric-label">Time Left (s)</div>
+            </div>
+        </div>
+        
+        <div id="reaction-chamber">
+            <div class="reactions-container">
+                <span id="reaction-count">0</span> reactions
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="temperature">Temperature (K)</label>
+                    <input type="range" id="temperature" min="273" max="673" value="298" step="1">
+                    <div class="value-display">Current: <span id="temperature-value">298</span> K</div>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="concentration">Concentration (mol/L)</label>
+                    <input type="range" id="concentration" min="0.1" max="2" value="0.5" step="0.1">
+                    <div class="value-display">Current: <span id="concentration-value">0.5</span> mol/L</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="surface-area">Surface Area (m²)</label>
+                    <input type="range" id="surface-area" min="1" max="20" value="5" step="1">
+                    <div class="value-display">Current: <span id="surface-area-value">5</span> m²</div>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="catalyst">Catalyst Amount (mg)</label>
+                    <input type="range" id="catalyst" min="0" max="100" value="0" step="10">
+                    <div class="value-display">Current: <span id="catalyst-value">0</span> mg</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="pressure">Pressure (atm)</label>
+                    <input type="range" id="pressure" min="1" max="10" value="1" step="0.5">
+                    <div class="value-display">Current: <span id="pressure-value">1</span> atm</div>
+                </div>
+                
+                <button id="reset-btn">Reset Simulation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let particles = [];
+        let reactionRate = 0;
+        let totalReactions = 0;
+        let timeLeft = 60;
+        let timer;
+        let targetRate = 5;
+        let reactionCount = 0;
+        let lastReactionTime = Date.now();
+        
+        // Controls
+        const temperatureSlider = document.getElementById('temperature');
+        const concentrationSlider = document.getElementById('concentration');
+        const surfaceAreaSlider = document.getElementById('surface-area');
+        const catalystSlider = document.getElementById('catalyst');
+        const pressureSlider = document.getElementById('pressure');
+        
+        // Display elements
+        const temperatureValue = document.getElementById('temperature-value');
+        const concentrationValue = document.getElementById('concentration-value');
+        const surfaceAreaValue = document.getElementById('surface-area-value');
+        const catalystValue = document.getElementById('catalyst-value');
+        const pressureValue = document.getElementById('pressure-value');
+        const reactionRateDisplay = document.getElementById('reaction-rate');
+        const totalReactionsDisplay = document.getElementById('total-reactions');
+        const timeLeftDisplay = document.getElementById('time-left');
+        const reactionCountDisplay = document.getElementById('reaction-count');
+        const levelProgress = document.getElementById('level-progress');
+        const resetBtn = document.getElementById('reset-btn');
+        const chamber = document.getElementById('reaction-chamber');
+        
+        // Initialize the simulation
+        function initSimulation() {
+            clearParticles();
+            createParticles(parseInt(concentrationSlider.value * 10));
+            updateControls();
+            startTimer();
+        }
+        
+        // Update control values display
+        function updateControls() {
+            temperatureValue.textContent = temperatureSlider.value;
+            concentrationValue.textContent = concentrationSlider.value;
+            surfaceAreaValue.textContent = surfaceAreaSlider.value;
+            catalystValue.textContent = catalystSlider.value;
+            pressureValue.textContent = pressureSlider.value;
+        }
+        
+        // Create particles
+        function createParticles(count) {
+            const chamberWidth = chamber.offsetWidth;
+            const chamberHeight = chamber.offsetHeight;
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random position
+                const x = Math.random() * (chamberWidth - 20);
+                const y = Math.random() * (chamberHeight - 20);
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // Store additional properties
+                particle.dataset.speedX = (Math.random() - 0.5) * 2;  // Random direction
+                particle.dataset.speedY = (Math.random() - 0.5) * 2;  // Random direction
+                
+                chamber.appendChild(particle);
+                particles.push(particle);
+            }
+        }
+        
+        // Clear all particles
+        function clearParticles() {
+            particles.forEach(particle => particle.remove());
+            particles = [];
+        }
+        
+        // Move particles
+        function moveParticles() {
+            // Get current values
+            const temperature = parseInt(temperatureSlider.value);
+            const catalyst = parseInt(catalystSlider.value);
+            const pressure = parseFloat(pressureSlider.value);
+            
+            // Base speed factor from temperature (K)
+            // Higher temperature = faster particle movement
+            const baseSpeedFactor = (temperature - 273) / 100;
+            
+            // Catalyst reduces collision energy needed
+            const catalystFactor = 1 + (catalyst / 100);
+            
+            // Pressure affects collision probability
+            const pressureFactor = pressure / 3;
+            
+            // Combined speed factor for particles
+            const speedFactor = baseSpeedFactor * catalystFactor * pressureFactor;
+            
+            const chamberWidth = chamber.offsetWidth;
+            const chamberHeight = chamber.offsetHeight;
+            
+            particles.forEach(particle => {
+                // Current position
+                let x = parseFloat(particle.style.left);
+                let y = parseFloat(particle.style.top);
+                
+                // Current speed
+                let speedX = parseFloat(particle.dataset.speedX) * speedFactor;
+                let speedY = parseFloat(particle.dataset.speedY) * speedFactor;
+                
+                // New position
+                x += speedX;
+                y += speedY;
+                
+                // Boundary checking - bounce off walls
+                if (x <= 0 || x >= chamberWidth - 20) {
+                    speedX = -speedX;
+                    x = Math.max(0, Math.min(x, chamberWidth - 20));
+                }
+                
+                if (y <= 0 || y >= chamberHeight - 20) {
+                    speedY = -speedY;
+                    y = Math.max(0, Math.min(y, chamberHeight - 20));
+                }
+                
+                // Update position and speed
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.dataset.speedX = speedX / speedFactor;
+                particle.dataset.speedY = speedY / speedFactor;
+                
+                // Check for collisions with other particles
+                checkCollisions(particle, x, y);
+            });
+        }
+        
+        // Check for collisions between particles
+        function checkCollisions(particle, x, y) {
+            const surfaceArea = parseInt(surfaceAreaSlider.value);
+            const catalyst = parseInt(catalystSlider.value);
+            
+            // Surface area increases collision probability
+            const collisionProbability = surfaceArea / 100;
+            
+            // Catalyst reduces activation energy
+            const reactionProbability = catalyst / 200;  
+            
+            particles.forEach(otherParticle => {
+                if (particle !== otherParticle) {
+                    const otherX = parseFloat(otherParticle.style.left);
+                    const otherY = parseFloat(otherParticle.style.top);
+                    
+                    // Simple distance check for collision
+                    const dist = Math.sqrt(Math.pow(x - otherX, 2) + Math.pow(y - otherY, 2));
+                    
+                    if (dist < 15) {  // Collision threshold
+                        // Bounce effect
+                        const tempSpeedX = particle.dataset.speedX;
+                        const tempSpeedY = particle.dataset.speedY;
+                        
+                        particle.dataset.speedX = otherParticle.dataset.speedX;
+                        particle.dataset.speedY = otherParticle.dataset.speedY;
+                        
+                        otherParticle.dataset.speedX = tempSpeedX;
+                        otherParticle.dataset.speedY = tempSpeedY;
+                        
+                        // Chance of reaction based on factors
+                        if (Math.random() < collisionProbability + reactionProbability) {
+                            simulateReaction(particle, otherParticle);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Simulate a chemical reaction
+        function simulateReaction(particle1, particle2) {
+            // Visual feedback for reaction
+            particle1.style.backgroundColor = '#f1c40f';  // Yellow flash
+            particle2.style.backgroundColor = '#f1c40f';
+            
+            // Count the reaction
+            reactionCount++;
+            totalReactions++;
+            reactionCountDisplay.textContent = reactionCount;
+            totalReactionsDisplay.textContent = totalReactions;
+            
+            // Calculate current reaction rate (reactions per second)
+            const now = Date.now();
+            const timeDiff = (now - lastReactionTime) / 1000;  // in seconds
+            if (timeDiff > 0) {
+                // Smooth the rate calculation
+                reactionRate = 0.7 * reactionRate + 0.3 * (1 / timeDiff);
+                reactionRateDisplay.textContent = reactionRate.toFixed(1);
+                
+                // Update progress based on how close we are to the target
+                const progress = Math.min(100, (reactionRate / targetRate) * 100);
+                levelProgress.style.width = `${progress}%`;
+                
+                // Check if target is reached
+                if (Math.abs(reactionRate - targetRate) < 0.5) {
+                    levelProgress.style.backgroundColor = '#27ae60';  // Green
+                } else {
+                    levelProgress.style.backgroundColor = '#2ecc71';  // Light green
+                }
+            }
+            
+            lastReactionTime = now;
+            
+            // Reset color after animation
+            setTimeout(() => {
+                particle1.style.backgroundColor = '#e74c3c';
+                particle2.style.backgroundColor = '#e74c3c';
+            }, 300);
+        }
+        
+        // Start the timer
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 60;
+            timeLeftDisplay.textContent = timeLeft;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timeLeftDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert(`Level complete! Final reaction rate: ${reactionRate.toFixed(1)}/s\nTotal reactions: ${totalReactions}`);
+                }
+            }, 1000);
+        }
+        
+        // Animation loop
+        function animate() {
+            moveParticles();
+            requestAnimationFrame(animate);
+        }
+        
+        // Event listeners
+        temperatureSlider.addEventListener('input', updateControls);
+        concentrationSlider.addEventListener('input', function() {
+            updateControls();
+            // Adjust particle count based on concentration
+            const targetCount = parseInt(this.value * 10);
+            const currentCount = particles.length;
+            
+            if (targetCount > currentCount) {
+                createParticles(targetCount - currentCount);
+            } else if (targetCount < currentCount) {
+                // Remove excess particles
+                for (let i = 0; i < currentCount - targetCount; i++) {
+                    if (particles.length > 0) {
+                        const particle = particles.pop();
+                        particle.remove();
+                    }
+                }
+            }
+        });
+        
+        surfaceAreaSlider.addEventListener('input', updateControls);
+        catalystSlider.addEventListener('input', updateControls);
+        pressureSlider.addEventListener('input', updateControls);
+        
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            initSimulation();
+        });
+        
+        // Initialize and start
+        initSimulation();
+        animate();
+    </script>
+</body>
+</html>
